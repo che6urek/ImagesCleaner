@@ -1,34 +1,32 @@
 #include "Source.h"
 #include "DuplicatesSearch.h"
 
-const auto firstPathButtonId = 1001;
-const auto secondPathButtonId = 1002;
-const auto findDuplicatesButtonId = 1003;
-const auto extensionCheckBoxId = 1004;
-const auto deleteButtonId = 1005;
-const auto maxLoadString = 100;
+#define FIRST_PATH_BUTTON_ID 1001
+#define SECOND_PATH_BUTTON_ID 1002
+#define FIND_DUPLICATES_BUTTON_ID 1003
+#define EXTENSION_CHECKBOX_ID 1004
+#define DELETE_BUTTON_ID 1005
+#define MAX_LOAD_STRING 100
 
-const auto fontSize = 12;
-const auto maxDisplayedPathLength = 60;
-const auto maxPathLength = 2048;
+#define FONT_SIZE 12
+#define MAX_DISPLAYED_PATH_LENGTH 60
+#define MAX_PATH_LENGTH 2048
 
-const auto windowWidth = 700;
-const auto windowHeight = 250;
-const auto windowXMargin = 200;
-const auto windowYMargin = 200;
+#define WINDOW_WIDTH 700
+#define WINDOW_HEIGHT 250
+#define WINDOW_X_MARGIN 200
+#define WINDOW_Y_MARGIN 200
 
-const auto buttonWidth = 130;
-const auto buttonHeight = 30;
-const auto xMargin = 15;
-const auto yMargin = 10;
-
-const auto segmentSize = 32;
+#define BUTTON_WIDTH 130
+#define BUTTON_HEIGHT 30
+#define X_MARGIN 15
+#define Y_MARGIN 10
 
 const wstring duplicatesFile = L"duplicates.txt";
 
 HINSTANCE hInst;
-WCHAR title[maxLoadString] = L"Images Cleaner";
-WCHAR windowClass[maxLoadString] = L"ImagesCleanerClass";
+WCHAR title[MAX_LOAD_STRING] = L"Images Cleaner";
+WCHAR windowClass[MAX_LOAD_STRING] = L"ImagesCleanerClass";
 RECT rect;
 
 wstring firstSelectedPath;
@@ -103,7 +101,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	HWND hWnd = CreateWindowW(windowClass, title,
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-		windowXMargin, windowYMargin, windowWidth, windowHeight,
+		WINDOW_X_MARGIN, WINDOW_Y_MARGIN, WINDOW_WIDTH, WINDOW_HEIGHT,
 		nullptr, nullptr, hInstance, nullptr);
 
 	if (!hWnd)
@@ -127,40 +125,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		const int wmId = LOWORD(wParam);
 		switch (wmId)
 		{
-		case firstPathButtonId:
+		case FIRST_PATH_BUTTON_ID:
 			PathClick(hWnd, firstSelectedPath, reducedFirstPath);
 			break;
-		case secondPathButtonId:
+		case SECOND_PATH_BUTTON_ID:
 			PathClick(hWnd, secondSelectedPath, reducedSecondPath);
 			break;
-		case findDuplicatesButtonId:
+		case FIND_DUPLICATES_BUTTON_ID:
 		{
 			if (firstSelectedPath.empty() && secondSelectedPath.empty())
 			{
 				break;
 			}
 			duplicatesCount = DuplicatesSearch::GetDuplicates(firstSelectedPath, secondSelectedPath,
-				images, IsDlgButtonChecked(hWnd, extensionCheckBoxId));
+				images, IsDlgButtonChecked(hWnd, EXTENSION_CHECKBOX_ID));
 			SaveToFile(duplicatesFile, images);
 			InvalidateRect(hWnd, nullptr, TRUE);
 			break;
 		}
-		case extensionCheckBoxId:
+		case EXTENSION_CHECKBOX_ID:
 		{
-			const bool checked = IsDlgButtonChecked(hWnd, extensionCheckBoxId);
+			const bool checked = IsDlgButtonChecked(hWnd, EXTENSION_CHECKBOX_ID);
 			if (checked)
 			{
-				CheckDlgButton(hWnd, extensionCheckBoxId, BST_UNCHECKED);
+				CheckDlgButton(hWnd, EXTENSION_CHECKBOX_ID, BST_UNCHECKED);
 			}
 			else
 			{
-				CheckDlgButton(hWnd, extensionCheckBoxId, BST_CHECKED);
+				CheckDlgButton(hWnd, EXTENSION_CHECKBOX_ID, BST_CHECKED);
 			}
 
 			Reset(hWnd);
 			break;
 		}
-		case deleteButtonId:
+		case DELETE_BUTTON_ID:
 		{
 			DeleteFiles(images);
 			Reset(hWnd);
@@ -176,22 +174,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		PAINTSTRUCT ps;
 		SolidBrush brush(Color::Black);
-		Font font(L"Arial", fontSize, FontStyleBold);
+		Font font(L"Arial", FONT_SIZE, FontStyleBold);
 		HDC hdc = BeginPaint(hWnd, &ps);
 		Graphics graphics(hdc);
 
 		if (!reducedFirstPath.empty())
 		{
-			const PointF point(xMargin * 2 + buttonWidth, yMargin + fontSize / 2);
+			const PointF point(X_MARGIN * 2 + BUTTON_WIDTH, Y_MARGIN + FONT_SIZE / 2);
 			graphics.DrawString(reducedFirstPath.c_str(), reducedFirstPath.length(), &font, point, &brush);
 		}
 		if (!reducedSecondPath.empty())
 		{
-			const PointF point(xMargin * 2 + buttonWidth, yMargin * 2 + buttonHeight + fontSize / 2);
+			const PointF point(X_MARGIN * 2 + BUTTON_WIDTH, Y_MARGIN * 2 + BUTTON_HEIGHT + FONT_SIZE / 2);
 			graphics.DrawString(reducedSecondPath.c_str(), reducedSecondPath.length(), &font, point, &brush);
 		}
 
-		const PointF point(xMargin * 2 + buttonWidth, yMargin * 4 + buttonHeight * 3 + fontSize / 2);
+		const PointF point(X_MARGIN * 2 + BUTTON_WIDTH, Y_MARGIN * 4 + BUTTON_HEIGHT * 3 + FONT_SIZE / 2);
 		const wstring duplicates = L"Duplicates: " + (duplicatesCount == -1 ? L"-" : std::to_wstring(duplicatesCount));
 		graphics.DrawString(duplicates.c_str(), duplicates.length(), &font, point, &brush);
 
@@ -204,33 +202,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		CreateWindow(L"button", L"Get first path",
 			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			xMargin, yMargin,
-			buttonWidth, buttonHeight,
-			hWnd, HMENU(firstPathButtonId), hInst, NULL);
+			X_MARGIN, Y_MARGIN,
+			BUTTON_WIDTH, BUTTON_HEIGHT,
+			hWnd, HMENU(FIRST_PATH_BUTTON_ID), hInst, NULL);
 
 		CreateWindow(L"button", L"Get second path",
 			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			xMargin, buttonHeight + yMargin * 2,
-			buttonWidth, buttonHeight,
-			hWnd, HMENU(secondPathButtonId), hInst, NULL);
+			X_MARGIN, BUTTON_HEIGHT + Y_MARGIN * 2,
+			BUTTON_WIDTH, BUTTON_HEIGHT,
+			hWnd, HMENU(SECOND_PATH_BUTTON_ID), hInst, NULL);
 
 		CreateWindow(L"button", L"Check extension",
 			WS_CHILD | WS_VISIBLE | BS_CHECKBOX,
-			xMargin, buttonHeight * 2 + yMargin * 3,
-			buttonWidth, buttonHeight,
-			hWnd, HMENU(extensionCheckBoxId), hInst, NULL);
+			X_MARGIN, BUTTON_HEIGHT * 2 + Y_MARGIN * 3,
+			BUTTON_WIDTH, BUTTON_HEIGHT,
+			hWnd, HMENU(EXTENSION_CHECKBOX_ID), hInst, NULL);
 
 		CreateWindow(L"button", L"Find duplicates",
 			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			xMargin, buttonHeight * 3 + yMargin * 4,
-			buttonWidth, buttonHeight,
-			hWnd, HMENU(findDuplicatesButtonId), hInst, NULL);
+			X_MARGIN, BUTTON_HEIGHT * 3 + Y_MARGIN * 4,
+			BUTTON_WIDTH, BUTTON_HEIGHT,
+			hWnd, HMENU(FIND_DUPLICATES_BUTTON_ID), hInst, NULL);
 
 		CreateWindow(L"button", L"Delete duplicates",
 			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-			xMargin, buttonHeight * 4 + yMargin * 5,
-			buttonWidth, buttonHeight,
-			hWnd, HMENU(deleteButtonId), hInst, NULL);
+			X_MARGIN, BUTTON_HEIGHT * 4 + Y_MARGIN * 5,
+			BUTTON_WIDTH, BUTTON_HEIGHT,
+			hWnd, HMENU(DELETE_BUTTON_ID), hInst, NULL);
 
 		break;
 	}
@@ -265,14 +263,14 @@ void PathClick(HWND hWnd, wstring& path, wstring& reducedPath)
 
 LPWSTR GetPath()
 {
-	LPWSTR fileName = new WCHAR[maxPathLength];
+	LPWSTR fileName = new WCHAR[MAX_PATH_LENGTH];
 	fileName[0] = '\0';
 
 	OPENFILENAME openFile;
 	ZeroMemory(&openFile, sizeof openFile);
 	openFile.lStructSize = sizeof openFile;
 	openFile.hwndOwner = nullptr;
-	openFile.nMaxFile = maxPathLength;
+	openFile.nMaxFile = MAX_PATH_LENGTH;
 	openFile.lpstrFile = fileName;
 	openFile.lpstrFilter = L"Pictures (*.jpg; *.png; *.bmp; *.jpeg; *.icon)\0*.jpg; *.png; *.bmp; *.jpeg; *.icon\0All Files (*.*)\0*.*\0";
 	openFile.Flags = OFN_NOVALIDATE;
@@ -285,15 +283,15 @@ LPWSTR GetPath()
 
 wstring ReducePath(wstring path)
 {
-	if (path.length() > maxDisplayedPathLength)
+	if (path.length() > MAX_DISPLAYED_PATH_LENGTH)
 	{
 		const wstring file(path.begin() + path.find_last_of(L'\\') + 1, path.end());
-		if (file.length() > maxDisplayedPathLength - 4)
+		if (file.length() > MAX_DISPLAYED_PATH_LENGTH - 4)
 		{
-			return file.substr(0, maxDisplayedPathLength / 2 - 3).append(L"...")
-				.append(file.substr(file.length() - maxDisplayedPathLength / 2 + 3, file.length()));
+			return file.substr(0, MAX_DISPLAYED_PATH_LENGTH / 2 - 3).append(L"...")
+				.append(file.substr(file.length() - MAX_DISPLAYED_PATH_LENGTH / 2 + 3, file.length()));
 		}
-		return path.substr(0, maxDisplayedPathLength - 4 - file.length()).append(L"...\\").append(file);
+		return path.substr(0, MAX_DISPLAYED_PATH_LENGTH - 4 - file.length()).append(L"...\\").append(file);
 
 	}
 	return path;
