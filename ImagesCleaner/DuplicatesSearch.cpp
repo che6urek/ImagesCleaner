@@ -71,21 +71,28 @@ void DuplicatesSearch::GetFiles(const path& path, vector<vector<filesystem::path
     {
         return;
     }
-    if (!is_directory(path))
+    try 
     {
-        files->push_back(new vector<filesystem::path>);
-        files->back()->push_back(path);
-    }
-    else
-    {
-        for (const auto& p : recursive_directory_iterator(path))
+        if (!is_directory(path))
         {
-            if (!is_directory(p) && CheckExtension(p.path()))
+            files->push_back(new vector<filesystem::path>);
+            files->back()->push_back(path);
+        }
+        else
+        {
+            for (const auto& p : recursive_directory_iterator(path))
             {
-                files->push_back(new vector<filesystem::path>);
-                files->back()->push_back(p.path());
+                if (!is_directory(p) && CheckExtension(p.path()))
+                {
+                    files->push_back(new vector<filesystem::path>);
+                    files->back()->push_back(p.path());
+                }
             }
         }
+    }
+    catch(filesystem_error& e)
+    {
+        
     }
 }
 
@@ -132,59 +139,60 @@ int DuplicatesSearch::FindDuplicates(vector<vector<path>*>* files, bool checkExt
     return duplicates;
 }
 
+//Image* DuplicatesSearch::GetGrayVersion(Image* image)
+//{
+//    Image* newImage = new Bitmap(image->GetWidth(), image->GetHeight());
+//    Graphics grayGraphics(newImage);
+//    ColorMatrix colorMatrix =
+//    {
+//        0.3f, 0.3f, 0.3f, 0.0f, 0.0f,
+//        0.59f, 0.59f, 0.59f, 0.0f, 0.0f,
+//        0.11f, 0.11f, 0.11f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+//    };
+//
+//    ImageAttributes imageAttributes;
+//    imageAttributes.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
+//    grayGraphics.DrawImage(image, Rect(0, 0, image->GetWidth(), image->GetHeight()), 0, 0,
+//        image->GetWidth(), image->GetHeight(), UnitPixel, &imageAttributes);
+//
+//    return newImage;
+//}
+
 int DuplicatesSearch::GetDifference(Image* firstImage, Image* secondImage)
 {
+    //Image* firstImageGray = GetGrayVersion(firstImage);
+    //Image* secondImageGray = GetGrayVersion(secondImage);
+
+    //auto firstBitmap = dynamic_cast<Bitmap*>(Resize(firstImageGray, segmentSize, segmentSize));
+    //auto secondBitmap = dynamic_cast<Bitmap*>(Resize(secondImageGray, segmentSize, segmentSize));
+
     auto firstBitmap = dynamic_cast<Bitmap*>(Resize(firstImage, segmentSize, segmentSize));
     auto secondBitmap = dynamic_cast<Bitmap*>(Resize(secondImage, segmentSize, segmentSize));
 
-
-    int differences[segmentSize][segmentSize];
-    int firstGray[segmentSize][segmentSize];
-    int secondGray[segmentSize][segmentSize];
-
-    Color pixelColor;
+    Color pixelColor1, pixelColor2;
+    int differentPixels = 0;
 
     for (auto x = 0; x < segmentSize; x++)
     {
         for (auto y = 0; y < segmentSize; y++)
         {
-            firstBitmap->GetPixel(x, y, &pixelColor);
-            firstGray[x][y] = abs(int(pixelColor.GetValue()));
-        }
-    }
-
-    for (auto x = 0; x < segmentSize; x++)
-    {
-        for (auto y = 0; y < segmentSize; y++)
-        {
-            secondBitmap->GetPixel(x, y, &pixelColor);
-            secondGray[x][y] = abs(int(pixelColor.GetValue()));
+            firstBitmap->GetPixel(x, y, &pixelColor1);
+            secondBitmap->GetPixel(x, y, &pixelColor2);
+            if(abs(int(pixelColor1.GetValue()) - int(pixelColor2.GetValue())) > 0)
+            //if (abs(::byte(pixelColor1.GetBlue()) - ::byte(pixelColor2.GetBlue())) > precision)
+            {
+                differentPixels++;
+            }
         }
     }
 
     delete firstBitmap;
     delete secondBitmap;
 
-    for (auto x = 0; x < segmentSize; x++)
-    {
-        for (auto y = 0; y < segmentSize; y++)
-        {
-            differences[x][y] = int(abs(firstGray[x][y] - secondGray[x][y]));
-        }
-    }
-
-    int differentPixels = 0;
-
-    for (auto i = 0; i < segmentSize; i++)
-    {
-        for (auto j = 0; j < segmentSize; j++)
-        {
-            if (differences[i][j] > 0)
-            {
-                differentPixels++;
-            }
-        }
-    }
+    //delete firstImageGray;
+    //delete secondImageGray;
 
     return differentPixels;
 }
