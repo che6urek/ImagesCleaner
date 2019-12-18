@@ -90,7 +90,7 @@ void DuplicatesSearch::GetFiles(const path& path, vector<vector<filesystem::path
                         files->back()->push_back(p.path());
                     }
                 }
-                catch (filesystem_error & e)
+                catch (filesystem_error& e)
                 {
 
                 }
