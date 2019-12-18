@@ -67,12 +67,12 @@ bool DuplicatesSearch::CheckExtension(const path& file)
 
 void DuplicatesSearch::GetFiles(const path& path, vector<vector<filesystem::path>*>* files)
 {
-    if (path.empty())
-    {
-        return;
-    }
     try 
     {
+        if (path.empty())
+        {
+            return;
+        }
         if (!is_directory(path))
         {
             files->push_back(new vector<filesystem::path>);
@@ -82,17 +82,24 @@ void DuplicatesSearch::GetFiles(const path& path, vector<vector<filesystem::path
         {
             for (const auto& p : recursive_directory_iterator(path))
             {
-                if (!is_directory(p) && CheckExtension(p.path()))
+                try
                 {
-                    files->push_back(new vector<filesystem::path>);
-                    files->back()->push_back(p.path());
+                    if (!is_directory(p) && CheckExtension(p.path()))
+                    {
+                        files->push_back(new vector<filesystem::path>);
+                        files->back()->push_back(p.path());
+                    }
+                }
+                catch (filesystem_error & e)
+                {
+
                 }
             }
         }
     }
-    catch(filesystem_error& e)
+    catch (filesystem_error & e)
     {
-        
+
     }
 }
 

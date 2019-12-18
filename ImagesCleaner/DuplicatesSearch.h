@@ -19,7 +19,7 @@ public:
     static int GetDuplicates(const path& path1, const path& path2,
         vector<vector<path>*>* files, bool checkExtensions);
 private:
-    static const int segmentSize = 32;
+    static const int segmentSize = 16;
     static inline const set<string> extensions{ ".jpg", ".png", ".bmp", ".jpeg", ".icon" };
 
     static bool IsSubDir(path path, filesystem::path root);
